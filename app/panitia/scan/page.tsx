@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Html5Qrcode from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 
 export default function ScanPage() {
   const scannerRef = useRef<Html5Qrcode | null>(null);
