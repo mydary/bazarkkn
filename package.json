@@ -10,7 +10,6 @@
     "prisma:migrate": "prisma migrate dev"
   },
   "dependencies": {
-    "@next/swc-win32-x64-msvc": "^14.2.5",
     "@prisma/client": "^5.19.0",
     "bcryptjs": "^2.4.3",
     "html5-qrcode": "^2.3.8",
