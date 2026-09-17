@@ -32,6 +32,9 @@ dev.log
 server.log
 server-err.log
 
+# package lock (generated fresh per platform)
+package-lock.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
