@@ -1,0 +1,9 @@
+{
+  "name": "Pasar Bazar",
+  "short_name": "Bazar",
+  "start_url": "/pasar",
+  "display": "standalone",
+  "background_color": "#F1EFE4",
+  "theme_color": "#2F4B26",
+  "icons": []
+}
