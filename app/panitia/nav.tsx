@@ -19,7 +19,6 @@ export default function PanitiaNav({ staffName, kelompokName }: { staffName: str
       <div className="flex items-center justify-between mb-1">
         <span className="font-display font-semibold text-paddy">{kelompokName}</span>
         <div className="flex items-center gap-3 text-sm">
-          <span className="text-kerbau">{staffName}</span>
           <button
             onClick={() => { setLoggingOut(true); signOut({ callbackUrl: "/login" }); }}
             disabled={loggingOut}
