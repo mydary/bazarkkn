@@ -91,6 +91,9 @@ export default function BayarPage({ params }: { params: { orderId: string } }) {
         <h1 className="font-display font-bold text-2xl text-ink text-center mt-1">
           {currentGroup.kelompok.name}
         </h1>
+        <p className="text-[10px] text-kerbau/40 text-center mt-1">
+          Dibuat oleh Dary Ikhsan, Fakultas Ilmu Komputer, UNIBA
+        </p>
 
         <div className="bg-gabah/10 border border-gabah/20 rounded-lg p-3 mt-4 text-center">
           <p className="text-xs text-ink/70 leading-relaxed">

@@ -79,7 +79,8 @@ export default function PesananPage({ params }: { params: { orderId: string } })
   return (
     <div className="min-h-screen max-w-md mx-auto px-5 pb-10">
       <h1 className="font-display font-bold text-2xl text-ink pt-8 mb-1">Status Pesanan</h1>
-      <p className="text-sm text-kerbau mb-4">Atas nama {order.buyerName}</p>
+      <p className="text-sm text-kerbau mb-1">Atas nama {order.buyerName}</p>
+      <p className="text-[10px] text-kerbau/40 mb-4">Dibuat oleh Dary Ikhsan, Fakultas Ilmu Komputer, UNIBA</p>
 
       <div className="bg-gabah/10 border border-gabah/20 rounded-lg p-3 mb-5">
         <p className="text-xs text-ink/70 leading-relaxed">

@@ -26,9 +26,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="id" className={`${bitter.variable} ${jakarta.variable}`}>
       <body className="bg-anyaman text-ink font-sans min-h-screen antialiased">
         <Providers>{children}</Providers>
-        <footer className="text-center py-3 text-[10px] text-kerbau/50">
-          Dibuat oleh Dary Ikhsan, Fakultas Ilmu Komputer, UNIBA
-        </footer>
       </body>
     </html>
   );

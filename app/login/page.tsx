@@ -68,16 +68,27 @@ function LoginForm() {
           {loading ? "Masuk..." : "Masuk"}
         </button>
       </form>
+      <a
+        href="https://wa.me/6285782451102?text=Halo%20Ikhsan%2C%20saya%20lupa%20password%20akun%20panitia%20saya.%20Bisa%20dibantu%20untuk%20mengatur%20ulang%3F"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-center text-xs text-cream/50 hover:text-cream/80 mt-4"
+      >
+        Lupa password? Hubungi admin
+      </a>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-paddy flex items-center justify-center px-6">
+    <div className="min-h-screen bg-paddy flex flex-col items-center justify-center px-6">
       <Suspense>
         <LoginForm />
       </Suspense>
+      <p className="text-[10px] text-cream/30 mt-8 text-center">
+        Dibuat oleh Dary Ikhsan, Fakultas Ilmu Komputer, UNIBA
+      </p>
     </div>
   );
 }

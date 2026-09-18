@@ -56,6 +56,9 @@ export default function PasarPage() {
           className="w-full h-auto"
         />
       </header>
+      <p className="text-center text-[10px] text-kerbau/40 py-1.5">
+        Dibuat oleh Dary Ikhsan, Fakultas Ilmu Komputer, UNIBA
+      </p>
 
       {bazarOpen === false && (
         <div className="max-w-lg mx-auto px-3 pt-4">
