@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // GET /api/pasar -- daftar semua kelompok + kategori + produk (tanpa imageUrl untuk keep response kecil)
 export async function GET() {
   const kelompokList = await prisma.kelompok.findMany({
@@ -37,5 +40,8 @@ export async function GET() {
     })),
   }));
 
-  return NextResponse.json({ kelompokList: stripped });
+  const res = NextResponse.json({ kelompokList: stripped });
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  res.headers.set("Pragma", "no-cache");
+  return res;
 }
