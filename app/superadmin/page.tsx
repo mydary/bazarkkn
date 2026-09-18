@@ -55,10 +55,15 @@ export default function SuperadminPage() {
   async function loadStats() {
     try {
       const res = await fetch("/api/superadmin/stats", { credentials: "include" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("Stats API error:", res.status, err);
+      }
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
       setStats(data);
-    } catch {
+    } catch (e) {
+      console.error("loadStats error:", e);
       setStats(null);
     } finally {
       setLoading(false);

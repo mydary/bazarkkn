@@ -12,50 +12,42 @@ export async function GET() {
   }
 
   try {
-    const [
-      totalOrders,
-      totalRevenue,
-      completedOrders,
-      pendingOrders,
-      totalProducts,
-      totalKelompok,
-      recentOrders,
-      kelompokStats,
-      categoryStats,
-    ] = await Promise.all([
-      prisma.order.count(),
-      prisma.orderGroup.aggregate({ _sum: { subtotal: true }, where: { status: { in: ["VERIFIED", "COMPLETED"] } } }),
-      prisma.orderGroup.count({ where: { status: "COMPLETED" } }),
-      prisma.orderGroup.count({ where: { status: { in: ["AWAITING_CLAIM", "WAITING_VERIFICATION"] } } }),
-      prisma.product.count(),
-      prisma.kelompok.count(),
-      prisma.order.findMany({
-        take: 10,
-        orderBy: { id: "desc" },
-        include: {
-          groups: { select: { subtotal: true, status: true, kelompok: { select: { name: true } } } },
+    const totalOrders = await prisma.order.count().catch(() => 0);
+
+    const totalRevenueResult = await prisma.orderGroup.aggregate({
+      _sum: { subtotal: true },
+      where: { status: { in: ["VERIFIED", "COMPLETED"] } },
+    }).catch(() => ({ _sum: { subtotal: 0 } }));
+
+    const completedOrders = await prisma.orderGroup.count({ where: { status: "COMPLETED" } }).catch(() => 0);
+    const pendingOrders = await prisma.orderGroup.count({ where: { status: { in: ["AWAITING_CLAIM", "WAITING_VERIFICATION"] } } }).catch(() => 0);
+    const totalProducts = await prisma.product.count().catch(() => 0);
+    const totalKelompok = await prisma.kelompok.count().catch(() => 0);
+
+    const recentOrders = await prisma.order.findMany({
+      take: 10,
+      orderBy: { id: "desc" },
+      include: {
+        groups: { select: { subtotal: true, status: true, kelompok: { select: { name: true } } } },
+      },
+    }).catch(() => []);
+
+    const kelompokStats = await prisma.kelompok.findMany({
+      select: {
+        name: true,
+        orderGroups: { select: { subtotal: true, status: true } },
+        products: { select: { id: true } },
+      },
+    }).catch(() => []);
+
+    const categoryStats = await prisma.category.findMany({
+      select: {
+        name: true,
+        products: {
+          select: { orderItems: { select: { qty: true, priceAtOrder: true } } },
         },
-      }),
-      prisma.kelompok.findMany({
-        select: {
-          name: true,
-          orderGroups: {
-            select: { subtotal: true, status: true },
-          },
-          products: { select: { id: true } },
-        },
-      }),
-      prisma.category.findMany({
-        select: {
-          name: true,
-          products: {
-            select: {
-              orderItems: { select: { qty: true, priceAtOrder: true } },
-            },
-          },
-        },
-      }),
-    ]);
+      },
+    }).catch(() => []);
 
     const kelompokRevenue = kelompokStats.map((k) => ({
       name: k.name,
@@ -81,7 +73,7 @@ export async function GET() {
 
     return NextResponse.json({
       totalOrders,
-      totalRevenue: totalRevenue._sum.subtotal ?? 0,
+      totalRevenue: totalRevenueResult._sum.subtotal ?? 0,
       completedOrders,
       pendingOrders,
       totalProducts,
