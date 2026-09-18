@@ -8,6 +8,11 @@ type CartLine = { productId: string; qty: number; notes?: string };
 // Item dari kelompok berbeda otomatis dikelompokkan jadi OrderGroup terpisah,
 // masing-masing punya QRIS & barcode ambil sendiri.
 export async function POST(req: NextRequest) {
+  const bazar = await prisma.bazarSetting.findUnique({ where: { id: "singleton" } });
+  if (bazar && !bazar.isOpen) {
+    return NextResponse.json({ error: "Bazar sedang tutup" }, { status: 403 });
+  }
+
   const body = await req.json();
   const { buyerName, buyerContact, deliveryMethod, deliveryLocation, items } = body as {
     buyerName: string;

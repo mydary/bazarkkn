@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "../cart-context";
 
@@ -13,6 +13,11 @@ export default function CartPage() {
   const [deliveryLocation, setDeliveryLocation] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [bazarOpen, setBazarOpen] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch("/api/bazar-status").then((r) => r.json()).then((d) => setBazarOpen(d.isOpen));
+  }, []);
 
   const byKelompok = new Map<string, { kelompokName: string; lines: typeof lines }>();
   for (const line of lines) {
@@ -63,6 +68,20 @@ export default function CartPage() {
         <button onClick={() => router.push("/pasar")} className="bg-paddy text-cream rounded-lg px-5 py-2.5 text-sm">
           Ke Pasar
         </button>
+      </div>
+    );
+  }
+
+  if (bazarOpen === false) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 max-w-sm">
+          <p className="font-display font-semibold text-red-700 mb-1">Bazar Sedang Tutup</p>
+          <p className="text-sm text-red-500 mb-4">Pesanan tidak dapat dibuat saat bazar tutup.</p>
+          <button onClick={() => router.push("/pasar")} className="bg-paddy text-cream rounded-lg px-5 py-2.5 text-sm">
+            Ke Pasar
+          </button>
+        </div>
       </div>
     );
   }
