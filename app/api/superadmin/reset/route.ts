@@ -14,7 +14,6 @@ export async function POST() {
     prisma.orderGroup.deleteMany(),
     prisma.order.deleteMany(),
     prisma.product.deleteMany(),
-    prisma.category.deleteMany(),
     prisma.kelompok.updateMany({
       data: { qrisImageUrl: null, whatsappNumber: null },
     }),
