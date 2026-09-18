@@ -85,13 +85,18 @@ export default function SuperadminPage() {
       const res = await fetch("/api/superadmin/bazar", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ isOpen: next }),
       });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("Toggle bazar failed:", res.status, err);
+        throw new Error("Failed");
+      }
       const data = await res.json();
       setIsOpen(data.isOpen);
     } catch {
-      // revert if failed
+      setIsOpen(!next);
     } finally {
       setToggling(false);
     }
