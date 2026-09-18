@@ -53,10 +53,16 @@ export default function SuperadminPage() {
   }, [session, role, router]);
 
   async function loadStats() {
-    const res = await fetch("/api/superadmin/stats");
-    const data = await res.json();
-    setStats(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/superadmin/stats");
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      setStats(data);
+    } catch {
+      setStats(null);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function loadBazarStatus() {
@@ -75,13 +81,20 @@ export default function SuperadminPage() {
   async function toggleBazar() {
     setToggling(true);
     const next = !isOpen;
-    await fetch("/api/superadmin/bazar", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isOpen: next }),
-    });
-    setIsOpen(next);
-    setToggling(false);
+    try {
+      const res = await fetch("/api/superadmin/bazar", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isOpen: next }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      setIsOpen(data.isOpen);
+    } catch {
+      // revert if failed
+    } finally {
+      setToggling(false);
+    }
   }
 
   async function resetDatabase() {
