@@ -21,13 +21,19 @@ export default function PasarPage() {
   const { lines, addToCart, totalCount, totalPrice } = useCart();
 
   useEffect(() => {
+    const ts = Date.now();
     Promise.all([
-      fetch("/api/pasar").then((r) => r.json()),
-      fetch("/api/bazar-status").then((r) => r.json()),
+      fetch(`/api/pasar?t=${ts}`).then((r) => r.json()),
+      fetch(`/api/bazar-status?t=${ts}`).then((r) => r.json()),
     ]).then(([pasarData, statusData]) => {
       setKelompokList(pasarData.kelompokList ?? []);
       setBazarOpen(statusData.isOpen);
     }).finally(() => setLoading(false));
+
+    const interval = setInterval(() => {
+      fetch(`/api/bazar-status?t=${Date.now()}`).then((r) => r.json()).then((d) => setBazarOpen(d.isOpen));
+    }, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {

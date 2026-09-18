@@ -11,7 +11,12 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
   const setting = await prisma.bazarSetting.findUnique({ where: { id: "singleton" } });
-  return NextResponse.json({ isOpen: setting?.isOpen ?? false });
+  return NextResponse.json({ isOpen: setting?.isOpen ?? false }, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+      Pragma: "no-cache",
+    },
+  });
 }
 
 export async function PATCH(req: Request) {
