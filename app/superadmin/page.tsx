@@ -54,7 +54,7 @@ export default function SuperadminPage() {
 
   async function loadStats() {
     try {
-      const res = await fetch("/api/superadmin/stats");
+      const res = await fetch("/api/superadmin/stats", { credentials: "include" });
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
       setStats(data);
@@ -66,9 +66,13 @@ export default function SuperadminPage() {
   }
 
   async function loadBazarStatus() {
-    const res = await fetch("/api/superadmin/bazar");
-    const data = await res.json();
-    setIsOpen(data.isOpen);
+    try {
+      const res = await fetch("/api/superadmin/bazar", { credentials: "include" });
+      const data = await res.json();
+      setIsOpen(data.isOpen);
+    } catch {
+      // ignore
+    }
   }
 
   useEffect(() => {
@@ -182,7 +186,7 @@ export default function SuperadminPage() {
             <span className="spinner spinner-dark mx-auto mb-3" style={{ width: "24px", height: "24px", borderWidth: "3px" }} />
             <p className="text-sm text-kerbau">Memuat statistik...</p>
           </div>
-        ) : stats && (
+        ) : stats ? (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <StatCard label="Total Pesanan" value={stats.totalOrders} />
@@ -271,6 +275,10 @@ export default function SuperadminPage() {
               )}
             </div>
           </>
+        ) : (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+            <p className="text-sm text-red-600">Gagal memuat statistik. Coba refresh halaman.</p>
+          </div>
         )}
       </div>
     </div>
