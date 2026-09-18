@@ -44,6 +44,8 @@ export default function SuperadminPage() {
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [passwords, setPasswords] = useState<{ username: string; password: string }[] | null>(null);
+  const [settingPw, setSettingPw] = useState(false);
 
   const role = (session?.user as any)?.role;
   useEffect(() => {
@@ -124,6 +126,20 @@ export default function SuperadminPage() {
     alert("Database berhasil direset.");
   }
 
+  async function setupPasswords() {
+    if (!confirm("Ubah semua password panitia ke password baru yang unik?")) return;
+    setSettingPw(true);
+    try {
+      const res = await fetch("/api/superadmin/setup-passwords", { method: "POST", credentials: "include" });
+      const data = await res.json();
+      if (data.ok) setPasswords(data.passwords);
+    } catch {
+      alert("Gagal mengatur password.");
+    } finally {
+      setSettingPw(false);
+    }
+  }
+
   if (role !== "SUPERADMIN") return null;
 
   return (
@@ -184,6 +200,33 @@ export default function SuperadminPage() {
           >
             {resetting ? "Meriset..." : "Reset Semua Data"}
           </button>
+        </div>
+
+        <div className="bg-white rounded-xl border border-kerbau/10 p-5">
+          <h2 className="font-display font-semibold text-ink mb-1">Password Panitia</h2>
+          <p className="text-sm text-kerbau mb-4">
+            Atur ulang semua password panitia ke password unik per kelompok.
+          </p>
+          <button
+            onClick={setupPasswords}
+            disabled={settingPw}
+            className="bg-gabah text-ink rounded-lg px-5 py-2.5 text-sm font-medium disabled:opacity-50"
+          >
+            {settingPw ? "Mengatur..." : "Atur Password Baru"}
+          </button>
+          {passwords && (
+            <div className="mt-4 bg-anyaman rounded-lg p-4">
+              <p className="text-xs text-kerbau mb-2">Password baru (simpan!):</p>
+              <div className="space-y-1">
+                {passwords.map((p) => (
+                  <div key={p.username} className="flex justify-between text-sm">
+                    <span className="font-medium text-ink">{p.username}</span>
+                    <span className="font-mono text-paddy">{p.password}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {loading ? (
