@@ -49,6 +49,12 @@ export default function PanitiaProdukPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [editing, setEditing] = useState<Product | null>(null);
+  const [editForm, setEditForm] = useState({ categoryId: "", name: "", description: "", price: "", imageUrl: "" });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [compressingEdit, setCompressingEdit] = useState(false);
+  const editFileRef = useRef<HTMLInputElement>(null);
+
   async function load() {
     const [catsRes, prodRes] = await Promise.all([
       fetch("/api/panitia/categories"),
@@ -58,9 +64,7 @@ export default function PanitiaProdukPage() {
     setProducts((await prodRes.json()).products ?? []);
   }
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -105,8 +109,46 @@ export default function PanitiaProdukPage() {
     load();
   }
 
-  const inputClass =
-    "w-full border border-kerbau/20 rounded-lg px-3.5 py-2.5 text-sm bg-white outline-none focus:border-gabah";
+  function openEdit(p: Product) {
+    setEditing(p);
+    setEditForm({
+      categoryId: p.categoryId,
+      name: p.name,
+      description: p.description ?? "",
+      price: String(p.price),
+      imageUrl: p.imageUrl ?? "",
+    });
+  }
+
+  async function handleEditFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCompressingEdit(true);
+    const resized = await resizeImage(file);
+    setEditForm((prev) => ({ ...prev, imageUrl: resized }));
+    setCompressingEdit(false);
+  }
+
+  async function saveEdit() {
+    if (!editing || !editForm.name || !editForm.price) return;
+    setSavingEdit(true);
+    await fetch(`/api/panitia/products/${editing.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        categoryId: editForm.categoryId,
+        name: editForm.name,
+        description: editForm.description,
+        price: Number(editForm.price),
+        imageUrl: editForm.imageUrl,
+      }),
+    });
+    setSavingEdit(false);
+    setEditing(null);
+    load();
+  }
+
+  const inputClass = "w-full border border-kerbau/20 rounded-lg px-3.5 py-2.5 text-sm bg-white outline-none focus:border-gabah";
 
   return (
     <div className="space-y-10">
@@ -116,7 +158,7 @@ export default function PanitiaProdukPage() {
 
         <div className="bg-gabah/10 border border-gabah/20 rounded-lg p-3 mb-4">
           <p className="text-xs text-ink/70 leading-relaxed">
-            <strong className="text-ink">Cara pakai:</strong> Pilih kategori, isi nama & harga, upload foto produk (otomatis dikompres). Tekan &quot;Tambah produk&quot;. Atur ketersediaan dengan tombol &quot;Tersedia/Habis&quot;.
+            <strong className="text-ink">Cara pakai:</strong> Pilih kategori, isi nama & harga, upload foto produk (otomatis dikompres). Tekan &quot;Tambah produk&quot;. Edit atau atur ketersediaan dengan tombol di masing-masing produk.
           </p>
         </div>
 
@@ -132,59 +174,20 @@ export default function PanitiaProdukPage() {
       <section>
         <h2 className="font-display text-lg text-ink mb-3">Tambah produk</h2>
         <form onSubmit={addProduct} className="space-y-2.5 border border-kerbau/10 rounded-xl p-4 bg-white">
-          <select
-            className={inputClass}
-            value={form.categoryId}
-            onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-            disabled={adding}
-          >
+          <select className={inputClass} value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} disabled={adding}>
             <option value="">Pilih kategori</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
+            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-          <input
-            className={inputClass}
-            placeholder="Nama produk"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            disabled={adding}
-          />
-          <input
-            className={inputClass}
-            placeholder="Deskripsi (opsional)"
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            disabled={adding}
-          />
+          <input className={inputClass} placeholder="Nama produk" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} disabled={adding} />
+          <input className={inputClass} placeholder="Deskripsi (opsional)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} disabled={adding} />
           <div>
             <label className="block text-sm text-kerbau mb-1.5">Foto produk (opsional)</label>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFile}
-              className="text-sm"
-              disabled={adding || compressing}
-            />
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} className="text-sm" disabled={adding || compressing} />
             {compressing && <p className="text-xs text-kerbau mt-1">Mengkompres gambar...</p>}
-            {form.imageUrl && (
-              <img src={form.imageUrl} alt="Preview" className="w-24 h-24 object-cover rounded-lg mt-2" />
-            )}
+            {form.imageUrl && <img src={form.imageUrl} alt="Preview" className="w-24 h-24 object-cover rounded-lg mt-2" />}
           </div>
-          <input
-            type="number"
-            className={inputClass}
-            placeholder="Harga (Rp)"
-            value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-            disabled={adding}
-          />
-          <button
-            type="submit"
-            disabled={adding || compressing}
-            className="bg-paddy text-cream px-4 py-2.5 rounded-lg text-sm font-medium w-full disabled:opacity-50"
-          >
+          <input type="number" className={inputClass} placeholder="Harga (Rp)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} disabled={adding} />
+          <button type="submit" disabled={adding || compressing} className="bg-paddy text-cream px-4 py-2.5 rounded-lg text-sm font-medium w-full disabled:opacity-50">
             {adding ? <span className="spinner inline-block mr-1" /> : null}
             {adding ? "Menambahkan..." : "Tambah produk"}
           </button>
@@ -195,47 +198,82 @@ export default function PanitiaProdukPage() {
         <h2 className="font-display text-lg text-ink mb-3">Daftar produk</h2>
         <div className="space-y-2">
           {products.map((p) => (
-            <div key={p.id} className="border border-kerbau/10 rounded-xl p-3.5 bg-white flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                {p.imageUrl ? (
-                  <img src={p.imageUrl} alt={p.name} className="w-14 h-14 object-cover rounded-lg" />
-                ) : (
-                  <div className="w-14 h-14 bg-anyaman-soft rounded-lg flex items-center justify-center">
-                    <span className="text-kerbau/30 text-xl">📦</span>
+            <div key={p.id} className="border border-kerbau/10 rounded-xl p-3.5 bg-white">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  {p.imageUrl ? (
+                    <img src={p.imageUrl} alt={p.name} className="w-14 h-14 object-cover rounded-lg" />
+                  ) : (
+                    <div className="w-14 h-14 bg-anyaman-soft rounded-lg flex items-center justify-center">
+                      <span className="text-kerbau/30 text-xl">📦</span>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-ink">{p.name}</p>
+                    <p className="text-xs text-kerbau mt-0.5">
+                      {p.category.name} · Rp{p.price.toLocaleString("id-ID")}
+                    </p>
                   </div>
-                )}
-                <div>
-                  <p className="text-sm font-medium text-ink">{p.name}</p>
-                  <p className="text-xs text-kerbau mt-0.5">
-                    {p.category.name} · Rp{p.price.toLocaleString("id-ID")}
-                  </p>
                 </div>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <button
-                  onClick={() => toggleAvailable(p)}
-                  disabled={togglingId === p.id}
-                  className={`px-2.5 py-1 rounded-full text-xs disabled:opacity-50 ${
-                    p.isAvailable ? "bg-paddy/10 text-paddy" : "bg-kerbau/10 text-kerbau"
-                  }`}
-                >
-                  {togglingId === p.id ? <span className="spinner inline-block mr-1" style={{width:"12px",height:"12px",borderWidth:"2px"}} /> : null}
-                  {togglingId === p.id ? "..." : p.isAvailable ? "Tersedia" : "Habis"}
-                </button>
-                <button
-                  onClick={() => deleteProduct(p.id)}
-                  disabled={deleting === p.id}
-                  className="text-red-600 text-xs disabled:opacity-50"
-                >
-                  {deleting === p.id ? <span className="spinner-dark inline-block mr-1" /> : null}
-                  {deleting === p.id ? "Menghapus..." : "Hapus"}
-                </button>
+                <div className="flex items-center gap-2 text-sm">
+                  <button
+                    onClick={() => toggleAvailable(p)}
+                    disabled={togglingId === p.id}
+                    className={`px-2.5 py-1 rounded-full text-xs disabled:opacity-50 ${
+                      p.isAvailable ? "bg-paddy/10 text-paddy" : "bg-kerbau/10 text-kerbau"
+                    }`}
+                  >
+                    {togglingId === p.id ? <span className="spinner inline-block mr-1" style={{width:"12px",height:"12px",borderWidth:"2px"}} /> : null}
+                    {togglingId === p.id ? "..." : p.isAvailable ? "Tersedia" : "Habis"}
+                  </button>
+                  <button onClick={() => openEdit(p)} className="text-paddy text-xs font-medium px-2 py-1">
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteProduct(p.id)}
+                    disabled={deleting === p.id}
+                    className="text-red-600 text-xs disabled:opacity-50 px-2 py-1"
+                  >
+                    {deleting === p.id ? <span className="spinner-dark inline-block mr-1" /> : null}
+                    {deleting === p.id ? "..." : "Hapus"}
+                  </button>
+                </div>
               </div>
             </div>
           ))}
           {products.length === 0 && <p className="text-sm text-kerbau">Belum ada produk.</p>}
         </div>
       </section>
+
+      {editing && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4" onClick={() => setEditing(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-sm p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
+            <h2 className="font-display font-semibold text-ink text-lg">Edit Produk</h2>
+            <select className={inputClass} value={editForm.categoryId} onChange={(e) => setEditForm({ ...editForm, categoryId: e.target.value })}>
+              <option value="">Pilih kategori</option>
+              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+            <input className={inputClass} placeholder="Nama produk" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+            <input className={inputClass} placeholder="Deskripsi" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+            <div>
+              <label className="block text-sm text-kerbau mb-1.5">Foto produk</label>
+              <input ref={editFileRef} type="file" accept="image/*" onChange={handleEditFile} className="text-sm" disabled={compressingEdit} />
+              {compressingEdit && <p className="text-xs text-kerbau mt-1">Mengkompres gambar...</p>}
+              {editForm.imageUrl && <img src={editForm.imageUrl} alt="Preview" className="w-20 h-20 object-cover rounded-lg mt-2" />}
+            </div>
+            <input type="number" className={inputClass} placeholder="Harga (Rp)" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} />
+            <div className="flex gap-2 pt-1">
+              <button onClick={() => setEditing(null)} className="flex-1 border border-kerbau/20 text-ink rounded-lg py-2.5 text-sm font-medium">
+                Batal
+              </button>
+              <button onClick={saveEdit} disabled={savingEdit || compressingEdit || !editForm.name || !editForm.price} className="flex-1 bg-paddy text-cream rounded-lg py-2.5 text-sm font-medium disabled:opacity-50">
+                {savingEdit ? <span className="spinner inline-block mr-1" /> : null}
+                {savingEdit ? "Menyimpan..." : "Simpan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

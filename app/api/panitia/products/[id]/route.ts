@@ -16,6 +16,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (body.name !== undefined) data.name = body.name;
   if (body.description !== undefined) data.description = body.description;
   if (body.price !== undefined) data.price = Number(body.price);
+  if (body.categoryId !== undefined) data.categoryId = body.categoryId;
   if (body.isAvailable !== undefined) data.isAvailable = Boolean(body.isAvailable);
   if (body.imageUrl !== undefined) data.imageUrl = body.imageUrl;
 
