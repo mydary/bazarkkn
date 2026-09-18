@@ -162,6 +162,7 @@ export default function PesananPage({ params }: { params: { orderId: string } })
           );
         })}
       </div>
+      <a href="/pasar" className="mt-6 text-sm text-paddy hover:underline">&larr; Kembali ke Pasar</a>
     </div>
   );
 }

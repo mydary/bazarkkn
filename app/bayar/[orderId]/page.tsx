@@ -84,6 +84,7 @@ export default function BayarPage({ params }: { params: { orderId: string } }) {
   return (
     <div className="min-h-screen flex flex-col items-center px-6 py-10">
       <div className="w-full max-w-sm">
+        <a href="/pasar" className="text-sm text-kerbau hover:text-ink mb-4 inline-block">&larr; Kembali ke Pasar</a>
         <p className="text-xs text-kerbau text-center tracking-wide">
           Bayar kelompok {doneCount + 1} dari {order.groups.length}
         </p>

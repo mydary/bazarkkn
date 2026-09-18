@@ -64,6 +64,7 @@ function LoginForm() {
           disabled={loading}
           className="w-full bg-gabah text-ink rounded-lg py-2.5 font-medium mt-2"
         >
+          {loading ? <span className="spinner inline-block mr-1" style={{width:"14px",height:"14px",borderWidth:"2px"}} /> : null}
           {loading ? "Masuk..." : "Masuk"}
         </button>
       </form>

@@ -46,6 +46,7 @@ export default function PanitiaProdukPage() {
   const [adding, setAdding] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [compressing, setCompressing] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function load() {
@@ -86,11 +87,13 @@ export default function PanitiaProdukPage() {
   }
 
   async function toggleAvailable(p: Product) {
+    setTogglingId(p.id);
     await fetch(`/api/panitia/products/${p.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isAvailable: !p.isAvailable }),
     });
+    setTogglingId(null);
     load();
   }
 
@@ -211,11 +214,13 @@ export default function PanitiaProdukPage() {
               <div className="flex items-center gap-3 text-sm">
                 <button
                   onClick={() => toggleAvailable(p)}
-                  className={`px-2.5 py-1 rounded-full text-xs ${
+                  disabled={togglingId === p.id}
+                  className={`px-2.5 py-1 rounded-full text-xs disabled:opacity-50 ${
                     p.isAvailable ? "bg-paddy/10 text-paddy" : "bg-kerbau/10 text-kerbau"
                   }`}
                 >
-                  {p.isAvailable ? "Tersedia" : "Habis"}
+                  {togglingId === p.id ? <span className="spinner inline-block mr-1" style={{width:"12px",height:"12px",borderWidth:"2px"}} /> : null}
+                  {togglingId === p.id ? "..." : p.isAvailable ? "Tersedia" : "Habis"}
                 </button>
                 <button
                   onClick={() => deleteProduct(p.id)}

@@ -56,7 +56,8 @@ export default function ScanPage() {
 
   return (
     <div className="min-h-screen bg-paddy flex flex-col items-center px-5">
-      <h1 className="font-display font-bold text-2xl text-cream mt-6 mb-2">Scan Barcode</h1>
+      <a href="/panitia" className="self-start text-sm text-cream/70 hover:text-cream mt-4 mb-2">&larr; Kembali</a>
+      <h1 className="font-display font-bold text-2xl text-cream mt-2 mb-2">Scan Barcode</h1>
       <p className="text-sm text-cream/70 mb-2">Arahkan kamera ke barcode pembeli</p>
 
       <div className="bg-cream/10 border border-cream/20 rounded-lg p-3 mb-4 max-w-sm w-full">

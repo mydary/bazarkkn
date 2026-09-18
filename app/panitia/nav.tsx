@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -12,14 +13,20 @@ const LINKS = [
 
 export default function PanitiaNav({ staffName, kelompokName }: { staffName: string; kelompokName: string }) {
   const pathname = usePathname();
+  const [loggingOut, setLoggingOut] = useState(false);
   return (
     <nav className="border-b border-kerbau/10 bg-white px-5 py-4">
       <div className="flex items-center justify-between mb-1">
         <span className="font-display font-semibold text-paddy">{kelompokName}</span>
         <div className="flex items-center gap-3 text-sm">
           <span className="text-kerbau">{staffName}</span>
-          <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-paddy">
-            Keluar
+          <button
+            onClick={() => { setLoggingOut(true); signOut({ callbackUrl: "/login" }); }}
+            disabled={loggingOut}
+            className="text-paddy disabled:opacity-50"
+          >
+            {loggingOut ? <span className="spinner inline-block mr-1" style={{width:"12px",height:"12px",borderWidth:"2px"}} /> : null}
+            {loggingOut ? "Keluar..." : "Keluar"}
           </button>
         </div>
       </div>
